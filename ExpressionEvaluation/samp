@@ -1,0 +1,53 @@
+bool expr (const char *&, int& , int );
+
+bool n_expr (const char *&s, int &result) {
+    int n = 0;
+    while (isdigit(*s)) n = 10 * n + (*s++ - '0');
+    result = n;
+    return true;
+}
+
+bool p_expr (const char *&s, int &result) {
+    if (expr(++s, result, ')')) {
+        ++s;
+        return true;
+    }
+    return false;
+}
+
+bool o_expr (const char *&s, int &result, int eos) {
+    int oresult = 0;
+    const char *op = strchr("+-*/", *s);
+    if (op == 0) return false;
+    if (!expr(++s, oresult, eos)) return false;
+    switch (*op) {
+    case '+': result += oresult; break;
+    case '-': result -= oresult; break;
+    case '*': result *= oresult; break;
+    case '/': result /= oresult; break;
+    default: return false;
+    }
+    return true;
+}
+
+bool expr (const char *&s, int &result, int eos = 0) {
+    while (isspace(*s)) ++s;
+    if (*s == eos) return false;
+    if (isdigit(*s)) {
+        if (!n_expr(s, result)) return false;
+    } else if (*s == '(') {
+        if (!p_expr(s, result)) return false;
+    } else return false;
+    while (isspace(*s)) ++s;
+    if (*s == eos) return true;
+    return o_expr(s, result, eos);
+}
+
+bool Expression::validate(){
+	int result;
+	char const* test =  statement.c_str();
+	bool res = expr(test,result,0);
+	statement += ":" + result;
+	cout<< result<<endl;
+	return res;
+}

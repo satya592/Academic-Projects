@@ -1,0 +1,9 @@
+satyam:pwd
+admin:admin
+sindhu:pwd
+navya:pwd
+acn:pwd
+mangu:mangu
+shiva:pwd
+aditya:pwd
+id:pwd

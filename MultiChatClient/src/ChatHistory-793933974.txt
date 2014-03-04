@@ -1,0 +1,10 @@
+hdfajsdfasdfjsjkjkkaskdfahiasidfhaisdfihasdfiasdfhaisdfiahsdiihasdfhiasdiasdfEXIT
+Client 2: nothig
+Client 1: id it
+Client 1: asdf
+Client 2: asdf
+Client 4: client 4 joined chat
+Client 5: client 5 joined chat
+Client 4: hi
+Client 4: im aditya
+Client 2: wasp
