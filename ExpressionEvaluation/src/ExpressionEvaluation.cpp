@@ -24,7 +24,7 @@ bool Expression::validChar(){
 	}
 	return true;
 }
-
+//Nothing
 bool Expression::digits (const char *&expression) {
 //	string zero("0"), sten("10");
 //	cout<<"expression:"<<expression<<endl;
