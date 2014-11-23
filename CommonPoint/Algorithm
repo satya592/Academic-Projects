@@ -1,0 +1,32 @@
+We can slove this without passing through entire 2 lists and with out using extra space(hashing).
+
+Algo:  l1,l2 be the 2 lists (intersection point be x distance from l1 root and y distance from l2 root )
+
+1\ Start reversing both the simultaneously one node at a time. 
+
+During reversing:
+
+case1: x < y
+
+l1:  will pass through the intersection and keep going.
+
+12: By the time l2 reachs intersection, l1 already reveses path, so it will pass into l1 list(since the intersection point is now pointing into l1)
+
+case2: x > y
+
+Same as case1, this time l1 will pass through l2 list.
+
+case3: x=y
+
+It wont change the game plan.
+
+2\ One out the two list will reach the head of the other list. .i.e it will traverse x+y distance.
+
+3\ Now start reversing the list, which is pointing to head of other. This time it will traverse
+
+ .i.e it will traverse x+y distance
+
+4\ Start reversing the nodes of the other list which is l2, simultaneously compare with l1 , this time compare it . They will be equal after traversing x(x>y), this is the intersection point
+
+Complexity: O(x+y)
+

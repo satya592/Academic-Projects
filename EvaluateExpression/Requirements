@@ -1,0 +1,40 @@
+
+CS 6301.014 Implementation of advanced Data Structures and Algorithms
+Fall 2013
+Project 2
+Sep 7, 2013
+
+Due: 2 AM, Mon, Sep 30 on elearning
+
+
+Write a program that implements an arbitrary precision
+arithmetic package according to the specifications below.
+
+Your need to represent only nonnegative integers.  
+The numbers will be represented in base B (B chosen by you) by a linked list
+(read about representing polynomials with linked lists).
+Note that, for convenience, the list can be ordered from
+the least significant ``digit'' to the most significant ``digit''.
+
+The program takes input from stdin.
+Each line is an arithmetic expression with numbers (in decimal), +, -, *, ^ (exponentiation), and parentheses. 
+Operator precedence: ^, *, {+,-} (same as in programming languages).
+Your program should read each line and calculate the value of the expression
+and print it to stdout.  
+A line with "0" means the program should stop.
+
+Sample input:
+48-24
+24-48
+(2*3+4)*(4*3+2)
+((2*3
+2^100
+0
+
+Sample output:
+24
+Negative numbers are not supported.
+140
+syntax error
+1267650600228229401496703205376
+Bye.

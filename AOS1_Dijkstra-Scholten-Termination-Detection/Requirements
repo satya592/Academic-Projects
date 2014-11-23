@@ -1,0 +1,36 @@
+Assigned on: September 18, 2014
+Due date and time: October 2, 2014, 11:59 pm
+
+This is an individual project and you are expected to demonstrate its operation to the instructor and/or the TA.
+
+1 Requirements
+1. Source code must be in the C /C++ /Java programming language.
+2. The program must run on UTD machines (dc01, dc02, ..., dc45).
+For this project, you are required to have knowledge of thread and/or socket programming and its APIs for the language you choose. It can be assumed that each process is running on a single machine (dcxx).
+
+Description
+ImplementtheDijkstra-Scholten algorithm for termination detection. 
+There are fifteen processes,P1,...,P15,of which process P1 is the initiator. Each process, Pi, once activated goes through the following sequence of actions:
+
+1. Lets a period of time, t, elapse where t is randomly selected from the interval [0.25 second, 1 second],
+2. Generates a random value, v, in the range [0, 1]. If 0 ≤ v < 0.1, Pi goes from active state to idle state. If
+0.1 ≤ v ≤ 1, Pi generates a computation message for a process Pj selected randomly, where j ̸= i.
+3. If Pi is idle, it exits this sequence of steps.
+
+If an idle process receives a computation message, it becomes activated and resumes executing the sequence of steps listed above.
+
+Log of execution
+Each process Pi must manage its own file fi, initially empty. The following information must be appended to the file:
+• Each time Pi sends a computation message, it must append the local physical clock value, identity of the receiver,
+and the number of messages for which ACKs are yet to be received.
+• Each time Pi receives a computation message, it must append the local physical clock value, identity of the sender, whether this message makes Pi join the tree with the sender as its parent or an ACK is sent in response to this message.
+• Each time an ACK is received, Pi must append the local physical clock value, identity of the process from which the ACK is received, the number of messages for which ACKs are yet to be received.
+• When Pi goes from active to idle state, it must append the local physical clock value, and the following phrase: “From Active to Idle.”
+• When Pi is idle and the number of pending ACKs becomes zero, Pi must append the local physical clock value, the following phrase: “Sending ACK to parent and detaching from tree,” and the identity of the parent.
+• When P1 determines that the computation has terminated, it must append the local physical clock information, add the word “Termination,” and send a special TERMINATE message to all other processes.
+• On receiving the TERMINATE message, Pi must append the local physical clock value, add the phrase “Computation Terminated,” and terminate.
+
+Submission Information
+The submission should be through eLearning in the form of an archive consisting of:
+1. File(s) containing the source code.
+2. The README file, which describes how to run your program. 3. All the files.
