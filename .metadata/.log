@@ -1,0 +1,40 @@
+!SESSION 2014-11-23 02:06:25.075 -----------------------------------------------
+eclipse.buildId=4.4.0.I20140606-1215
+java.version=1.7.0_67
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -product org.eclipse.epp.package.standard.product -product org.eclipse.epp.package.standard.product -keyring /Users/satyamkotikalapudi/.eclipse_keyring -showlocation
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -product org.eclipse.epp.package.standard.product -data /Users/satyamkotikalapudi/Google Drive/CodeRepo -product org.eclipse.epp.package.standard.product -keyring /Users/satyamkotikalapudi/.eclipse_keyring -showlocation
+
+!ENTRY org.eclipse.core.net 1 0 2014-11-23 02:06:31.619
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY org.eclipse.cdt.core 1 0 2014-11-23 02:09:09.936
+!MESSAGE Indexed 'ExpressionEvaluation' (0 sources, 0 headers) in 0.005 sec: 0 declarations; 0 references; 0 unresolved inclusions; 0 syntax errors; 0 unresolved names (0%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2014-11-23 02:09:36.704
+!MESSAGE Indexed 'CplusplusWorks' (2 sources, 171 headers) in 26.8 sec: 21,077 declarations; 44,200 references; 0 unresolved inclusions; 25 syntax errors; 9 unresolved names (0.014%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2014-11-23 02:09:43.333
+!MESSAGE Indexed 'BigEndianLittleEndian' (1 sources, 170 headers) in 6.62 sec: 21,054 declarations; 44,158 references; 0 unresolved inclusions; 25 syntax errors; 9 unresolved names (0.014%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2014-11-23 02:09:48.581
+!MESSAGE Indexed 'FrameSizeFinder' (1 sources, 174 headers) in 5.24 sec: 23,217 declarations; 51,322 references; 0 unresolved inclusions; 25 syntax errors; 673 unresolved names (0.89%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2014-11-23 02:09:52.280
+!MESSAGE Indexed 'Test1' (1 sources, 172 headers) in 3.7 sec: 22,450 declarations; 45,816 references; 0 unresolved inclusions; 25 syntax errors; 9 unresolved names (0.013%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2014-11-23 02:09:55.741
+!MESSAGE Indexed 'Quciksort' (1 sources, 170 headers) in 3.46 sec: 21,051 declarations; 44,151 references; 0 unresolved inclusions; 25 syntax errors; 9 unresolved names (0.014%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2014-11-23 02:09:59.179
+!MESSAGE Indexed 'EvaluateExpression' (3 sources, 177 headers) in 3.43 sec: 26,524 declarations; 59,491 references; 0 unresolved inclusions; 25 syntax errors; 669 unresolved names (0.77%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2014-11-23 02:10:03.206
+!MESSAGE Indexed 'Edf_Rm_Scheduling' (1 sources, 182 headers) in 4.03 sec: 23,746 declarations; 53,270 references; 0 unresolved inclusions; 25 syntax errors; 671 unresolved names (0.86%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2014-11-23 02:10:06.409
+!MESSAGE Indexed 'a1b1' (1 sources, 181 headers) in 3.2 sec: 22,740 declarations; 46,299 references; 0 unresolved inclusions; 25 syntax errors; 9 unresolved names (0.013%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2014-11-23 02:10:09.818
+!MESSAGE Indexed 'Matchingcpp' (4 sources, 185 headers) in 3.41 sec: 26,371 declarations; 58,662 references; 0 unresolved inclusions; 25 syntax errors; 669 unresolved names (0.78%)

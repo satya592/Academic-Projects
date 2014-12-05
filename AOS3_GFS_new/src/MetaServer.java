@@ -296,10 +296,12 @@ public class MetaServer {
 		String name;
 		boolean status;
 		FileSystem fs;
-
+		int size;
+		
 		ServerInfo(String name) {
 			this.name = name;
 			status = true;
+			size=0;
 		}
 
 		ServerInfo(String name, boolean status, FileSystem fs) {
@@ -308,10 +310,21 @@ public class MetaServer {
 			this.fs = fs;
 		}
 
+		ServerInfo(String name, boolean status, FileSystem fs, int size) {
+			this.name = name;
+			this.status = status;
+			this.fs = fs;
+			this.size=size;
+		}
+
 		synchronized void setStatus(boolean status) {
 			this.status = status;
 			if (!status)
 				this.fs = null;
+		}
+
+		synchronized int getSize() {
+			return size;
 		}
 
 		synchronized boolean updateMetaData(String name, FileSystem fs) {
@@ -350,7 +363,7 @@ public class MetaServer {
 			}
 		}
 
-		synchronized int findMaxChunk(String fname) {
+		 int findMaxChunk(String fname) {
 			if (fs != null)
 				log("findMaxChunk:" + fname + "//" + status + "//"
 						+ this.fs.toString());
@@ -377,7 +390,7 @@ public class MetaServer {
 			}
 		}
 
-		synchronized int findSize(String fname, Integer chunkNo) {
+		 int findSize(String fname, Integer chunkNo) {
 			if (fs != null)
 				log("findSize:" + fname + "//" + status + "//"
 						+ this.fs.toString());
@@ -398,7 +411,7 @@ public class MetaServer {
 			}
 		}
 
-		synchronized int fileLock(String fname, Integer chunkNo) {
+		 int fileLock(String fname, Integer chunkNo) {
 			if (fs != null)
 				log("findSize:" + fname + "//" + status + "//"
 						+ this.fs.toString());
@@ -410,8 +423,7 @@ public class MetaServer {
 					if (this.fs.fileInfo.get(fname).fileChunks.get(chunkNo) == null)
 						return -1;
 					else
-						Lock(this.fs.fileInfo.get(fname).fileChunks
-								.get(chunkNo));
+						
 					return this.fs.fileInfo.get(fname).fileChunks.get(chunkNo);
 
 				} else

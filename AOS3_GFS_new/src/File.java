@@ -8,6 +8,7 @@ public class File implements Serializable {
 	 */
 	private static final long serialVersionUID = -3502154583442601824L;
 	String fileName;
+	
 	ConcurrentHashMap<Integer, Integer> fileChunks = new ConcurrentHashMap<Integer, Integer>();
 
 	public File(File file) {

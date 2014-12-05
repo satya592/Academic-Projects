@@ -1,0 +1,21 @@
+
+public class BitwisePalindrom {
+
+	static boolean bitwisePalindrom(int n){
+		if(n%2==0) return false;
+		int k=0;
+		boolean first=true;
+		for(int i=n;i!=0;i>>>=1){
+			if(!first) k<<=1;
+			else first=false;
+			k+=(i&1);
+		}
+			
+		return k==n;	
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(bitwisePalindrom(4));
+	}
+
+}

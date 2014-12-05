@@ -21,7 +21,7 @@ public class Listener {
 		try {
 			listener = new ServerSocket(port);
 
-			while (type == ListenerWrapper.DEMON) {
+			while (type == ListenerWrapper.DEMON) {//HeartBeats
 				ConcurrentHashMap<String, HeartBeatListener> clients = new ConcurrentHashMap<String, HeartBeatListener>();
 
 				Socket socket = listener.accept();
