@@ -104,6 +104,13 @@ public class Listener {
 					Message ret_msg = Server.requestHandler(msg);
 					out.writeObject(ret_msg);
 				}
+				
+				else if (type == ListenerWrapper.SER_REQ) {
+					Message msg = (Message) in.readObject();
+					log(msg.toString());
+					Message ret_msg = Server.serverRequestHandler(msg);
+					out.writeObject(ret_msg);
+				}
 			} catch (ClassNotFoundException | IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

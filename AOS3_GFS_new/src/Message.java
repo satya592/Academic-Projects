@@ -15,6 +15,7 @@ public class Message implements Serializable {
 	static final int STATUS_REQ = 8;
 	static final int STATUS_FAIL = 9;
 	static final int STATUS_SUCCESS = 10;
+	static final int HELLO  = 11;// edited by Bharath for Checking server is active or not
 
 	int type;
 	int status;
