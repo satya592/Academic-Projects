@@ -201,7 +201,52 @@ public class Server {
 	 * @param fName
 	 * @return
 	 */
-	public boolean Create(String s1, String s2, String fName)
+	public boolean Create(String s1, String s2, Message msg)
+	{
+		String fname = serverName + "/" + msg.fileName + msg.chunkNo;	
+		boolean isS1Active = IsServerActive(s1);
+		boolean isS2Active = IsServerActive(s2);
+		if(!isS1Active || !isS2Active)
+		{
+			return false;
+		}
+		else
+		{
+			if (FileOperations.writeFile(fname, 0, msg.data)) 
+			{
+				Fs.addFile(msg.fileName, msg.chunkNo, msg.data.length());
+				return(Create(s1, msg) && Create(s2, msg));
+			}
+			else
+			{
+				return false;
+			}
+		}		
+	}
+	
+	/**
+	 * Created by Bharath : Method called for creating files is replica server.
+	 * @param s2
+	 * @param fName
+	 * @return
+	 */
+	private boolean Create(String serverName, Message msg) {
+		String portNo = Config.getValue(serverName);
+		Message reply = Sender.messageToFileServer(serverName, portNo, msg);
+		if(reply.status == Message.STATUS_SUCCESS)
+			return true;
+		else
+			return false;
+	}
+
+	/**
+	 * Create by Bharath : Method called for Appending files and replicas.
+	 * @param s1
+	 * @param s2
+	 * @param msg
+	 * @return
+	 */
+	public boolean Append(String s1, String s2, Message msg)
 	{
 		boolean isS1Active = IsServerActive(s1);
 		boolean isS2Active = IsServerActive(s2);
@@ -211,20 +256,87 @@ public class Server {
 		}
 		else
 		{
-			return(Create(s1, fName) && Create(s2, fName));
+			String fname = serverName + "/" + msg.fileName + msg.chunkNo;
+			int fileSize = FileOperations.countCharsBuffer(fname, "US-ASCII");
+			StringBuilder sBuf = new StringBuilder();
+			String data = null;
+
+			if (msg.data == null) {
+				for (int i = 0; i < 8192 - fileSize; i++) {
+					sBuf.append("\0");
+				}
+				data = sBuf.toString();
+			} else {
+				data = msg.data;
+			}
+
+			if (FileOperations.writeFile(fname, fileSize, data)) {
+				Fs.addFile(msg.fileName, msg.chunkNo, fileSize + data.length());
+				return( Append(s1,msg) && Append(s2, msg));
+			} else {
+				return false;
+			}
 		}
-		
 	}
 	
 	/**
-	 * Created by Bharath : Method called for creating files is replica server.
-	 * @param s2
-	 * @param fName
+	 * Created by Bharath : Method called for Appending files is replica server.
+	 * @param serverName
+	 * @param msg
 	 * @return
 	 */
-	private boolean Create(String s2, String fName) {
-		// TODO Auto-generated method stub
-		return false;
+	private boolean Append(String serverName, Message msg) {
+		String portNo = Config.getValue(serverName);
+		Message reply = Sender.messageToFileServer(serverName, portNo, msg);
+		if(reply.status == Message.STATUS_SUCCESS)
+			return true;
+		else
+			return false;
+	}
+	
+	/**
+	 * Create by Bharath : Method called for Writing files and replicas.
+	 * @param s1
+	 * @param s2
+	 * @param msg
+	 * @return
+	 */
+	public boolean Write(String s1, String s2, Message msg)
+	{
+		String fname = serverName + "/" + msg.fileName + msg.chunkNo;	
+		boolean isS1Active = IsServerActive(s1);
+		boolean isS2Active = IsServerActive(s2);
+		if(!isS1Active || !isS2Active)
+		{
+			return false;
+		}
+		else
+		{
+			if (FileOperations.writeFile(fname, 0, msg.data)) {
+				Fs.addFile(msg.fileName, msg.chunkNo, msg.data.length());
+				return(Write(s1, msg) && Write(s2, msg));
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+
+	
+	/**
+	 * Created by Bharath : Method called for Writing files is replica server.
+	 * @param serverName
+	 * @param msg
+	 * @return
+	 */
+	private boolean Write(String serverName, Message msg) {
+		String portNo = Config.getValue(serverName);
+		Message reply = Sender.messageToFileServer(serverName, portNo, msg);
+		if(reply.status == Message.STATUS_SUCCESS)
+			return true;
+		else
+			return false;
 	}
 
 	/**
