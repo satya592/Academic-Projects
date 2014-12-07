@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -92,7 +94,7 @@ public class MetaServer {
 //					fs.addFile(fname, maxchunk, 8192);
 //					MetaServer.updateMetaData(sname,fs);
 					
-					servers.get(reply.serverName).fs.addFile(fname,
+					servers.get(sname).fs.addFile(fname,
 							maxchunk , 8192);
 
 				} else {
@@ -130,7 +132,7 @@ public class MetaServer {
 					reply.status = MetaMessage.STATUS_SUCCESS;
 
 					servers.get(reply.serverName).fs.addFile(fname,
-							maxchunk + 1, 0);
+							maxchunk + 1, len);
 				}
 
 			}
@@ -154,26 +156,8 @@ public class MetaServer {
 				break;
 			}
 
-			int fail = 0;
-			while (true) {
-				int rand = RandomNumber.randomInt(1, servers.size());
-				int count = 1;
-				for (Entry<String, ServerInfo> e : servers.entrySet()) {
-					if (rand == count) {
-						reply.serverName = e.getKey();
-						break;
-					}
-					count++;
-				}
-				if (servers.get(reply.serverName).status)
-					break;
-				else
-					fail++;
-				if (fail == servers.size()) {
-					reply.serverName = null;
-					break;
-				}
-			}
+			reply.serverName = MetaServer.loadBalance()[0];
+
 			if (reply.serverName == null) {
 				reply.data = "Error:Server not available";
 				break;
@@ -194,7 +178,7 @@ public class MetaServer {
 			}
 
 			if (rpyMsg.status == Message.STATUS_SUCCESS) {
-				servers.get(reply.serverName).fs.addFile(fname, 1, 0);
+				servers.get(reply.serverName).fs.addFile(fname, 1, len);
 				reply.fileName = fname;
 				reply.chunkNo = 1;
 				reply.status = MetaMessage.STATUS_SUCCESS;
@@ -206,7 +190,8 @@ public class MetaServer {
 			int maxchunkSize = -1;
 			for (Entry<String, ServerInfo> e : servers.entrySet()) {
 
-				log(e.getValue().fs.toString());
+				if(e.getValue().fs !=null) log(e.getValue().fs.toString());
+				else continue;
 
 				int chunkSize = e.getValue().findSize(fname, offSet / 8192 + 1);
 
@@ -242,34 +227,53 @@ public class MetaServer {
 
 			break;
 		}
-		System.out.println(reply);
+		log(reply.toString());
 		return reply;
 	}
 
+	private static class ServerComparator implements Comparator<ServerInfo> {
+		@Override
+		public int compare(ServerInfo x, ServerInfo y) {
+			System.out.println("ServerComparator "+x.toString());
+			System.out.println("ServerComparator "+y.toString());
+			if (x.size < y.size) {
+				return -1;
+			}
+			if (x.size > y.size) {
+				return 1;
+			}
+			return 0;
+		}
+
+	}
+
+
 	private static String[] loadBalance() {
-		PriorityQueue<ServerInfo> sortedServs = new PriorityQueue<ServerInfo>(10,
+		PriorityQueue<ServerInfo> sortedServs = new PriorityQueue<ServerInfo>(20,
 				new ServerComparator());
 		
-		String top3[] = new String[3];
+		ArrayList<String> top = new ArrayList<String>();
 		
 	    Iterator it = servers.entrySet().iterator();
 	    while (it.hasNext()) {
 	        Map.Entry pairs = (Map.Entry)it.next();
-	        System.out.println(pairs.getKey() + " = " + pairs.getValue());
+//	        log(pairs.getKey() + " = " + pairs.getValue().toString());
 	        sortedServs.add((ServerInfo) pairs.getValue());
 	    }
 	    
-	    int i=0;
 	    while(!sortedServs.isEmpty()){
-	    	ServerInfo sInfo = sortedServs.remove();
+	    	ServerInfo sInfo = sortedServs.poll();
+	    	System.out.println(sInfo.name);
 	    	if(sInfo.status){
-	    		top3[i++]=sInfo.name;
+	    		top.add(0,sInfo.name);
 	    	}
-	    	if(4==i)
-	    		return top3;
 	    }
-		
-		return null;
+
+	    String[] topArr = (String[]) top.toArray(new String[top.size()]);
+	    
+	    System.out.println("Load:"+Arrays.toString(topArr));
+	    
+	    return topArr;
 	}
 
 	static boolean updateMetaData(String serverName, FileSystem fs) {
@@ -321,24 +325,10 @@ public class MetaServer {
 	}
 
 	private static void log(String message) {
-		// System.out.println(message);
+//		 System.out.println(message);
 	}
 
 	
-	private static class ServerComparator implements Comparator<ServerInfo> {
-		@Override
-		public int compare(ServerInfo x, ServerInfo y) {
-			if (x.size < y.size) {
-				return -1;
-			}
-			if (x.size > y.size) {
-				return 1;
-			}
-			return 0;
-		}
-
-	}
-
 	
 	static class ServerInfo {
 		String name;
@@ -356,6 +346,7 @@ public class MetaServer {
 			this.name = name;
 			this.status = status;
 			this.fs = fs;
+			this.size=fs.size;
 		}
 
 		ServerInfo(String name, boolean status, FileSystem fs, int size) {

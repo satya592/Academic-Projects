@@ -77,7 +77,7 @@ public class FileSystem implements Serializable {
 			str.append(e.getKey() + "=" + e.getValue() + ";");
 		}
 
-		return serverName + "{" + str.toString() + "}";
+		return serverName+"(size:"+size+"){" + str.toString() + "}";
 	}
 
 	private void log(String message) {
