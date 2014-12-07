@@ -1,7 +1,14 @@
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+
 
 public class MetaServer {
 
@@ -62,28 +69,16 @@ public class MetaServer {
 				reply.serverName = sname;
 				reply.chunkNo = maxchunk;
 				reply.status = MetaMessage.STATUS_SUCCESS;
-			} else {
-				int fail = 0;
-				while (true) {
+				
+//				FileSystem fs = new FileSystem(sname);
+//				fs.addFile(fname, maxchunk, chunksize+len);
+//				MetaServer.updateMetaData(sname,fs);
+				
+				servers.get(reply.serverName).fs.addFile(fname,
+						maxchunk , chunksize+len);
 
-					int rand = RandomNumber.randomInt(1, servers.size());
-					int count = 1;
-					for (Entry<String, ServerInfo> e : servers.entrySet()) {
-						if (rand == count) {
-							reply.serverName = e.getKey();
-							break;
-						}
-						count++;
-					}
-					if (servers.get(reply.serverName).status)
-						break;
-					else
-						fail++;
-					if (fail == servers.size()) {
-						reply.serverName = null;
-						break;
-					}
-				}
+				
+			} else {
 
 				// append fill with nulls
 				Message rpyMsg = Sender.messageToFileServer(sname, Config
@@ -92,6 +87,14 @@ public class MetaServer {
 
 				if (rpyMsg != null && rpyMsg.status == Message.STATUS_SUCCESS) {
 					log(rpyMsg.toString());
+
+//					FileSystem fs = new FileSystem(sname);
+//					fs.addFile(fname, maxchunk, 8192);
+//					MetaServer.updateMetaData(sname,fs);
+					
+					servers.get(reply.serverName).fs.addFile(fname,
+							maxchunk , 8192);
+
 				} else {
 					if (rpyMsg != null)
 						log(rpyMsg.data);
@@ -102,6 +105,9 @@ public class MetaServer {
 					break;
 				}
 
+				//So far we are getting top 3 available servers
+				reply.serverName = MetaServer.loadBalance()[0];
+				
 				// Create file
 				Message rpy2Msg = Sender.messageToFileServer(reply.serverName,
 						Config.getValue(reply.serverName), new Message(
@@ -240,6 +246,32 @@ public class MetaServer {
 		return reply;
 	}
 
+	private static String[] loadBalance() {
+		PriorityQueue<ServerInfo> sortedServs = new PriorityQueue<ServerInfo>(10,
+				new ServerComparator());
+		
+		String top3[] = new String[3];
+		
+	    Iterator it = servers.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry pairs = (Map.Entry)it.next();
+	        System.out.println(pairs.getKey() + " = " + pairs.getValue());
+	        sortedServs.add((ServerInfo) pairs.getValue());
+	    }
+	    
+	    int i=0;
+	    while(!sortedServs.isEmpty()){
+	    	ServerInfo sInfo = sortedServs.remove();
+	    	if(sInfo.status){
+	    		top3[i++]=sInfo.name;
+	    	}
+	    	if(4==i)
+	    		return top3;
+	    }
+		
+		return null;
+	}
+
 	static boolean updateMetaData(String serverName, FileSystem fs) {
 
 		if (serverName == null)
@@ -292,6 +324,22 @@ public class MetaServer {
 		// System.out.println(message);
 	}
 
+	
+	private static class ServerComparator implements Comparator<ServerInfo> {
+		@Override
+		public int compare(ServerInfo x, ServerInfo y) {
+			if (x.size < y.size) {
+				return -1;
+			}
+			if (x.size > y.size) {
+				return 1;
+			}
+			return 0;
+		}
+
+	}
+
+	
 	static class ServerInfo {
 		String name;
 		boolean status;

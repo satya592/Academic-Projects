@@ -10,12 +10,14 @@ public class File implements Serializable {
 	String fileName;
 	
 	ConcurrentHashMap<Integer, Integer> fileChunks = new ConcurrentHashMap<Integer, Integer>();
+	public int size=0;
 
 	public File(File file) {
 		this.fileName = new String(file.fileName);
 		for (Entry<Integer, Integer> e : file.fileChunks.entrySet()) {
 			this.fileChunks.put(new Integer(e.getKey()),
 					new Integer(e.getValue()));
+			this.size+=e.getValue();
 		}
 
 	}
@@ -27,6 +29,7 @@ public class File implements Serializable {
 	synchronized boolean addChunk(Integer chunkName, Integer size) {
 		// if (fileChunks.get(chunkName) == null) {
 		fileChunks.put(chunkName, size);
+		this.size+=size;
 		return true;
 		// } else {
 		// return false;

@@ -76,6 +76,10 @@ public class Message implements Serializable {
 			msgtext.append("Append");
 			msgtext.append("|" + fileName + "|-->" + data);
 			break;
+		case HELLO:
+			msgtext.append("Hello");
+			msgtext.append("|" + fileName + "|-->" + data);
+			break;
 		default:
 			msgtext.append("unknown");
 		}
