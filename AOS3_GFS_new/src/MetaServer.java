@@ -1,13 +1,10 @@
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.PriorityQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -52,7 +49,7 @@ public class MetaServer {
 			int maxchunk = -1;
 			maxchunk = findMaxchunk(fname);
 		String servers3[] =findServer2Append(fname);
-		System.out.println("Selected servers:"+servers3[0]+":"+servers3[1]+":"+servers3[2]);
+		if(servers3!=null&&servers3.length == 3)System.out.println("Selected servers:"+servers3[0]+":"+servers3[1]+":"+servers3[2]);
 		
 			if (maxchunk <= -1 || servers3 == null) {
 				reply.data = "Error:File does not exist";
@@ -242,9 +239,7 @@ public class MetaServer {
 	private static int findMaxchunk(String fname) {
 		int maxchunk=-1;
 		for (Entry<String, ServerInfo> e : servers.entrySet()) {
-
 			int chunk = e.getValue().findMaxChunk(fname);
-
 			if (chunk > maxchunk) {
 				maxchunk = chunk;
 			}
@@ -260,46 +255,40 @@ public class MetaServer {
 	 */
 	static String[] findServer2Append(String fileName){
 		int maxchunk=-1;
-		for (Entry<String, ServerInfo> e : MetaServer.servers.entrySet()) {
-
-//			log(e.getValue().fs.toString());
-
-			int chunk = e.getValue().findMaxChunk(fileName);
-//			log(e.getValue().name + ":" + chunk);
-
-			if (chunk > maxchunk) {
-				maxchunk = chunk;
-				}
-			}
+		maxchunk = findMaxchunk(fileName);
+		ArrayList<String> servs = new ArrayList<String>();
 		
-		String servs[] = new String[3];
-		int i=1;
 		for (Entry<String, ServerInfo> e : servers.entrySet()) {
 
 			if(e.getValue().fs !=null) log(e.getValue().fs.toString());
 			else continue;
 
 			int chunkSize = e.getValue().findSize(fileName, maxchunk);
+			System.out.println(fileName+"("+chunkSize + ")"+e.getKey());
 
-
-			if (chunkSize > -1 && e.getValue().fs.isMaster(fileName)) {
-				servs[0]  = e.getKey();
-			}else if(chunkSize > -1 && i>=3){
-				servs[i++]  = e.getKey();				
-			}else if(chunkSize > -1){
+			if (chunkSize > -1){
+			if( e.getValue().fs.isMaster(fileName)) {
+				servs.add(0,e.getKey());
+			}else if(servs.size()<3){
+				servs.add(e.getKey());
+			}else {
 				System.out.println("ERROR: More than 3 replicas found");
+				break;
+			}
 			}
 		}
+		String servArr[] = servs.toArray(new String[servs.size()]);
+		System.out.println("FindServers:"+servArr[0]+":"+servArr[1]+":"+servArr[2]);
 
-		if(i==3) return servs;		
+		if(servArr.length==3){
+			return servArr;		
+		}
 		return null;
 		}
 
 	private static class ServerComparator implements Comparator<ServerInfo> {
 		@Override
 		public int compare(ServerInfo x, ServerInfo y) {
-//			System.out.println("ServerComparator "+x.name+":"+x.size);
-//			System.out.println("ServerComparator "+y.name+":"+y.size);
 			if (x.size < y.size) {
 				return -1;
 			}
@@ -322,7 +311,6 @@ public class MetaServer {
 	    while (it.hasNext()) {
 	        Map.Entry pairs = (Map.Entry)it.next();
 //	        System.out.println(pairs.getKey() + " = " + ((ServerInfo)pairs.getValue()).toString());
-	        
 	        sortedServs.add((ServerInfo) pairs.getValue());
 	    }
 	    
@@ -334,7 +322,7 @@ public class MetaServer {
 	    	}
 	    }
 
-	    String[] topArr = (String[]) top.toArray(new String[top.size()]);
+	    String[] topArr = top.toArray(new String[top.size()]);
 	    
 	    System.out.println("Load:"+Arrays.toString(topArr));
 	    
@@ -392,158 +380,5 @@ public class MetaServer {
 	private static void log(String message) {
 //		 System.out.println(message);
 	}
-
 	
-	
-	static class ServerInfo {
-		String name;
-		boolean status;
-		FileSystem fs;
-		int size;
-		
-		ServerInfo(String name) {
-			this.name = name;
-			status = true;
-			size=0;
-		}
-
-		ServerInfo(String name, boolean status, FileSystem fs) {
-			this.name = name;
-			this.status = status;
-			this.fs = fs;
-			this.size=fs.size;
-		}
-
-		ServerInfo(String name, boolean status, FileSystem fs, int size) {
-			this.name = name;
-			this.status = status;
-			this.fs = fs;
-			this.size=size;
-		}
-
-		synchronized void setStatus(boolean status) {
-			this.status = status;
-			if (!status)
-				this.fs = null;
-		}
-
-		synchronized int getSize() {
-			return size;
-		}
-		
-		public String toString(){
-			return name+"("+size+"){"+fs.toString()+"}";
-		}
-
-		synchronized boolean updateMetaData(String name, FileSystem fs) {
-
-			if (this.name != null && this.name.equals(name)
-					&& this.status == true && fs != null && fs.fileInfo != null) {
-				for (Entry<String, File> e : fs.fileInfo.entrySet()) {
-					if (this.fs.fileInfo.get(e.getKey()) == null) {
-						this.fs.addFile(e.getKey(), e.getValue());
-					} else {
-						File newF = e.getValue();
-						File curF = this.fs.fileInfo.get(e.getKey());
-						for (Entry<Integer, Integer> c : newF.fileChunks
-								.entrySet()) {
-							if (curF.fileChunks.get(c.getKey()) == null) {
-								curF.fileChunks.put(c.getKey(), c.getValue());
-							} else {
-								if (curF.fileChunks.get(c.getKey()) < c
-										.getValue())
-									curF.fileChunks.put(c.getKey(),
-											c.getValue());
-							}
-						}
-					}
-				}
-				
-				this.size = this.fs.size;
-				return true;
-
-			} else if (this.name.equals(name) && !this.status) {
-				this.fs = new FileSystem(fs);
-				this.status = true;
-				
-				this.size = this.fs.size;
-				return true;
-			} else {
-				this.size = this.fs.size;
-				log(this.name + "!=" + name + "mismatch in serverinfo update");
-				return false;
-			}
-		}
-
-		 int findMaxChunk(String fname) {
-			if (fs != null)
-				log("findMaxChunk:" + fname + "//" + status + "//"
-						+ this.fs.toString());
-
-			if (this.status == true) {
-				if (this.fs != null && this.fs.fileInfo != null
-						&& this.fs.fileInfo.get(fname) != null
-						&& this.fs.fileInfo.get(fname).fileChunks != null) {
-					Set<Integer> chunks = this.fs.fileInfo.get(fname).fileChunks
-							.keySet();
-
-					if (chunks != null) {
-						log(chunks.toString());
-						return Collections.max(chunks);
-					} else {
-						return -1;
-					}
-
-				} else
-					return -2;
-			} else {
-
-				return -3;
-			}
-		}
-
-		 int findSize(String fname, Integer chunkNo) {
-			if (fs != null)
-				log("findSize:" + fname + "//" + status + "//"
-						+ this.fs.toString());
-
-			if (status == true) {
-				if (this.fs != null && this.fs.fileInfo != null
-						&& this.fs.fileInfo.get(fname) != null
-						&& this.fs.fileInfo.get(fname).fileChunks != null) {
-					if (this.fs.fileInfo.get(fname).fileChunks.get(chunkNo) == null)
-						return -1;
-					else
-						return this.fs.fileInfo.get(fname).fileChunks
-								.get(chunkNo);
-				} else
-					return -2;
-			} else {
-				return -3;
-			}
-		}
-
-		 int fileLock(String fname, Integer chunkNo) {
-			if (fs != null)
-				log("findSize:" + fname + "//" + status + "//"
-						+ this.fs.toString());
-
-			if (status == true) {
-				if (this.fs != null && this.fs.fileInfo != null
-						&& this.fs.fileInfo.get(fname) != null
-						&& this.fs.fileInfo.get(fname).fileChunks != null) {
-					if (this.fs.fileInfo.get(fname).fileChunks.get(chunkNo) == null)
-						return -1;
-					else
-						
-					return this.fs.fileInfo.get(fname).fileChunks.get(chunkNo);
-
-				} else
-					return -2;
-			} else {
-				return -3;
-			}
-		}
-
-	}
 }
