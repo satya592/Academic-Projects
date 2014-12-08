@@ -31,14 +31,14 @@ public class FileSystem implements Serializable {
  * @param size
  * @return
  */
-	synchronized boolean addFile(String file, Integer chunkName, Integer size) {
+	synchronized boolean addFile(String file, Integer chunkName, Integer size,boolean master) {
 		log(file + ":" + chunkName + ":" + size);
 		// if (fileInfo.get(file) == null
 		// || fileInfo.get(file).fileChunks.get(chunkName) == null) {
 		if (fileInfo.get(file) == null){
-			fileInfo.put(file, new File(file));
+			fileInfo.put(file, new File(file,master));
 			}
-		fileInfo.get(file).addChunk(chunkName, size);
+		fileInfo.get(file).addChunk(chunkName, size,master);
 		this.size+=size;
 
 		return true;
@@ -47,11 +47,25 @@ public class FileSystem implements Serializable {
 		// }
 	}
 
-	synchronized boolean updateFile(String file, Integer chunkName, Integer newsize) {
+	synchronized File getFile(String file) {
+		if (fileInfo!=null)
+			return fileInfo.get(file);
+		
+		return null;
+	}
+
+	synchronized boolean isMaster(String file) {
+		if (fileInfo!=null)
+			return fileInfo.get(file).isMaster;
+		
+		return false;
+	}
+
+	synchronized boolean updateFile(String file, Integer chunkName, Integer newsize,boolean isMaster) {
 		log(file + ":" + chunkName + ":" + newsize);
 		if (fileInfo.get(file) == null)
 			return false;
-		fileInfo.get(file).addChunk(chunkName, newsize);
+		fileInfo.get(file).addChunk(chunkName, newsize,isMaster);
 		this.size+=size;
 		return true;
 	}

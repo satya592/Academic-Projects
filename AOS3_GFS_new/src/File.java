@@ -8,6 +8,7 @@ public class File implements Serializable {
 	 */
 	private static final long serialVersionUID = -3502154583442601824L;
 	String fileName;
+	public boolean isMaster=false;
 	
 	ConcurrentHashMap<Integer, Integer> fileChunks = new ConcurrentHashMap<Integer, Integer>();
 	public int size=0;
@@ -22,13 +23,15 @@ public class File implements Serializable {
 
 	}
 
-	public File(String file) {
+	public File(String file,boolean isMaster) {
 		fileName = file;
+		this.isMaster=isMaster;
 	}
 
-	synchronized boolean addChunk(Integer chunkName, Integer size) {
+	synchronized boolean addChunk(Integer chunkName, Integer size,boolean isMaster) {
 		// if (fileChunks.get(chunkName) == null) {
 		fileChunks.put(chunkName, size);
+		this.isMaster=isMaster;
 		this.size+=size;
 		return true;
 		// } else {

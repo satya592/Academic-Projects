@@ -17,7 +17,7 @@ public class Client {
 			return null;
 		else {
 			MetaMessage metaMsg = new MetaMessage(0, 0, null, 0, 0, null, null,
-					null);
+					null, null, null);
 			String fname = msg[1];
 			metaMsg.fileName = fname;
 
@@ -108,12 +108,12 @@ public class Client {
 
 						Message req_msg = new Message(statusMsg.type,
 								Message.STATUS_REQ, statusMsg.fileName,
-								statusMsg.chunkNo, statusMsg.offSet,
+								null, null, statusMsg.chunkNo, statusMsg.offSet,
 								statusMsg.len, data);
 
 						Message reply_msg = Sender.messageToFileServer(
-								statusMsg.serverName,
-								Config.getValue(statusMsg.serverName), req_msg);
+								statusMsg.masterServer,
+								Config.getValue(statusMsg.masterServer), req_msg);
 
 						if (reply_msg != null
 								&& reply_msg.status == Message.STATUS_SUCCESS) {

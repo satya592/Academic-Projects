@@ -17,12 +17,12 @@ public class Server {
 		}
 		return hostname;
 	}
-
-	synchronized static Message requestHandler(Message msg) {
+/*
+	synchronized static Message backup_requestHandler(Message msg) {
 		String fname = serverName + "/" + msg.fileName + msg.chunkNo;
 
 		Message reply = new Message(msg.type, Message.STATUS_FAIL,
-				msg.fileName, msg.chunkNo, msg.offSet, msg.len, null);
+				msg.fileName, msg.server1, msg.server2, msg.chunkNo, msg.offSet, msg.len, null);
 
 		switch (msg.type) {
 		case Message.APPEND:
@@ -41,7 +41,7 @@ public class Server {
 			}
 
 			if (FileOperations.writeFile(fname, fileSize, data)) {
-				Fs.addFile(msg.fileName, msg.chunkNo, fileSize + data.length());
+				Fs.addFile(msg.fileName, msg.chunkNo, fileSize + data.length(),true);
 				reply.status = Message.STATUS_SUCCESS;
 				reply.data = "Successfully appended";
 			} else {
@@ -50,7 +50,7 @@ public class Server {
 			break;
 		case Message.WRITE:
 			if (FileOperations.writeFile(fname, 0, msg.data)) {
-				Fs.addFile(msg.fileName, msg.chunkNo, msg.data.length());
+				Fs.addFile(msg.fileName, msg.chunkNo, msg.data.length(),true);
 				reply.status = Message.STATUS_SUCCESS;
 				reply.data = "Successfully written";
 			} else {
@@ -60,7 +60,61 @@ public class Server {
 
 		case Message.CREATE:
 			if (FileOperations.createFile(fname)) {
-				Fs.addFile(msg.fileName, msg.chunkNo, 0);
+				Fs.addFile(msg.fileName, msg.chunkNo, 0,true);
+				reply.status = Message.STATUS_SUCCESS;
+				reply.data = "Successfully created";
+			} else {
+				reply.data = "Failed to create file on disk";
+			}
+			break;
+
+		case Message.READ:
+			reply.data = new String(FileOperations.readFile(fname, msg.offSet,
+					msg.len));
+			if (reply.data != null) {
+				reply.status = Message.STATUS_SUCCESS;
+			} else {
+				reply.data = "Failed to read from the disk";
+			}
+			log("Read:" + reply.data);
+			break;
+			
+		case Message.HELLO:
+			reply.data = "Alive";
+			break;
+		}
+		System.out.println(reply.toString());
+		return reply;
+	}
+
+	*/
+	synchronized static Message requestHandler(Message msg) {
+		String fname = serverName + "/" + msg.fileName + msg.chunkNo;
+
+		Message reply = new Message(msg.type, Message.STATUS_FAIL,
+				msg.fileName, msg.server1, msg.server2, msg.chunkNo, msg.offSet, msg.len, null);
+
+		switch (msg.type) {
+		case Message.APPEND:
+
+			if (Append(msg.server1,msg.server2,msg)) {
+				reply.status = Message.STATUS_SUCCESS;
+				reply.data = "Successfully appended";
+			} else {
+				reply.data = "Failed to append file on disk";
+			}
+			break;
+		case Message.WRITE:
+			if (Write(msg.server1,msg.server2,msg)) {
+				reply.status = Message.STATUS_SUCCESS;
+				reply.data = "Successfully written";
+			} else {
+				reply.data = "Failed to write file on disk";
+			}
+			break;
+
+		case Message.CREATE:
+			if (Create(msg.server1,msg.server1,msg)) {
 				reply.status = Message.STATUS_SUCCESS;
 				reply.data = "Successfully created";
 			} else {
@@ -111,40 +165,31 @@ public class Server {
 			}
 			Fs.addFile(s.substring(0, end), Integer.valueOf(s.substring(end)),
 					FileOperations.countCharsBuffer(serverName + "/" + s,
-							"US-ASCII"));
+							"US-ASCII"),true);
 		}
 
 		Thread RequestListener = new Thread(new ListenerWrapper(reqPort,
 				ListenerWrapper.REQ));
 		RequestListener.start();
 
+//		edited by Bharath for Server to server communication.
+		Thread ServerRequestListener = new Thread(new ListenerWrapper(reqPort, ListenerWrapper.SER_REQ));
+		ServerRequestListener.start();
+
+		
 		// Server server = new Server();
 		Thread hbThread = new Thread(new ServerSenderWrapper(
 				Config.getValue("metaserver"), Config.getValue("metaport"), Fs));
 		hbThread.start();
 		hbThread.join();
 		
-		//edited by Bharath for Server to server communication.
-		Thread ServerRequestListener = new Thread(new ListenerWrapper(reqPort, ListenerWrapper.SER_REQ));
-		ServerRequestListener.start();
-		// while (true) {
-		// // if (Fs.addFile("Test" + RandomNumber.randomInt(1, 3),
-		// // RandomNumber.randomInt(1, 10), 512))
-		// // ;
-		// // if (Fs.addFile("Foo" + RandomNumber.randomInt(1, 3),
-		// // RandomNumber.randomInt(1, 10), 512))
-		// // ;
-		// // log("FS is:" + Fs.toString());
-		//
-		// Thread.sleep(3000);
-		// }
 	}
 
 	public static Message serverRequestHandler(Message msg) {
 		String fname = serverName + "/" + msg.fileName + msg.chunkNo;
 
 		Message reply = new Message(msg.type, Message.STATUS_FAIL,
-				msg.fileName, msg.chunkNo, msg.offSet, msg.len, null);
+				msg.fileName, msg.server1, msg.server1, msg.chunkNo, msg.offSet, msg.len, null);
 
 		switch (msg.type) {
 		case Message.APPEND:
@@ -163,7 +208,7 @@ public class Server {
 			}
 
 			if (FileOperations.writeFile(fname, fileSize, data)) {
-				Fs.addFile(msg.fileName, msg.chunkNo, fileSize + data.length());
+				Fs.addFile(msg.fileName, msg.chunkNo, fileSize + data.length(),false);
 				reply.status = Message.STATUS_SUCCESS;
 				reply.data = "Successfully appended";
 			} else {
@@ -172,7 +217,7 @@ public class Server {
 			break;
 		case Message.WRITE:
 			if (FileOperations.writeFile(fname, 0, msg.data)) {
-				Fs.addFile(msg.fileName, msg.chunkNo, msg.data.length());
+				Fs.addFile(msg.fileName, msg.chunkNo, msg.data.length(),false);
 				reply.status = Message.STATUS_SUCCESS;
 				reply.data = "Successfully written";
 			} else {
@@ -182,7 +227,7 @@ public class Server {
 
 		case Message.CREATE:
 			if (FileOperations.createFile(fname)) {
-				Fs.addFile(msg.fileName, msg.chunkNo, 0);
+				Fs.addFile(msg.fileName, msg.chunkNo, 0,false);
 				reply.status = Message.STATUS_SUCCESS;
 				reply.data = "Successfully created";
 			} else {
@@ -193,7 +238,7 @@ public class Server {
 		}
 		return reply;
 	}
-	
+
 	/**
 	 * Create by Bharath : Method called for creating files and replicas.
 	 * @param s1
@@ -201,7 +246,7 @@ public class Server {
 	 * @param fName
 	 * @return
 	 */
-	public boolean Create(String s1, String s2, Message msg)
+	public static boolean Create(String s1, String s2, Message msg)
 	{
 		String fname = serverName + "/" + msg.fileName + msg.chunkNo;	
 		boolean isS1Active = IsServerActive(s1);
@@ -214,7 +259,7 @@ public class Server {
 		{
 			if (FileOperations.writeFile(fname, 0, msg.data)) 
 			{
-				Fs.addFile(msg.fileName, msg.chunkNo, msg.data.length());
+				Fs.addFile(msg.fileName, msg.chunkNo, msg.data.length(),true);
 				return(Create(s1, msg) && Create(s2, msg));
 			}
 			else
@@ -230,7 +275,7 @@ public class Server {
 	 * @param fName
 	 * @return
 	 */
-	private boolean Create(String serverName, Message msg) {
+	private static boolean Create(String serverName, Message msg) {
 		String portNo = Config.getValue(serverName);
 		Message reply = Sender.messageToFileServer(serverName, portNo, msg);
 		if(reply.status == Message.STATUS_SUCCESS)
@@ -246,7 +291,7 @@ public class Server {
 	 * @param msg
 	 * @return
 	 */
-	public boolean Append(String s1, String s2, Message msg)
+	public static boolean Append(String s1, String s2, Message msg)
 	{
 		boolean isS1Active = IsServerActive(s1);
 		boolean isS2Active = IsServerActive(s2);
@@ -271,7 +316,7 @@ public class Server {
 			}
 
 			if (FileOperations.writeFile(fname, fileSize, data)) {
-				Fs.addFile(msg.fileName, msg.chunkNo, fileSize + data.length());
+				Fs.addFile(msg.fileName, msg.chunkNo, fileSize + data.length(),true);
 				return( Append(s1,msg) && Append(s2, msg));
 			} else {
 				return false;
@@ -285,7 +330,7 @@ public class Server {
 	 * @param msg
 	 * @return
 	 */
-	private boolean Append(String serverName, Message msg) {
+	private static boolean Append(String serverName, Message msg) {
 		String portNo = Config.getValue(serverName);
 		Message reply = Sender.messageToFileServer(serverName, portNo, msg);
 		if(reply.status == Message.STATUS_SUCCESS)
@@ -301,7 +346,7 @@ public class Server {
 	 * @param msg
 	 * @return
 	 */
-	public boolean Write(String s1, String s2, Message msg)
+	public static boolean Write(String s1, String s2, Message msg)
 	{
 		String fname = serverName + "/" + msg.fileName + msg.chunkNo;	
 		boolean isS1Active = IsServerActive(s1);
@@ -313,7 +358,7 @@ public class Server {
 		else
 		{
 			if (FileOperations.writeFile(fname, 0, msg.data)) {
-				Fs.addFile(msg.fileName, msg.chunkNo, msg.data.length());
+				Fs.addFile(msg.fileName, msg.chunkNo, msg.data.length(),true);
 				return(Write(s1, msg) && Write(s2, msg));
 			}
 			else
@@ -330,7 +375,7 @@ public class Server {
 	 * @param msg
 	 * @return
 	 */
-	private boolean Write(String serverName, Message msg) {
+	private static boolean Write(String serverName, Message msg) {
 		String portNo = Config.getValue(serverName);
 		Message reply = Sender.messageToFileServer(serverName, portNo, msg);
 		if(reply.status == Message.STATUS_SUCCESS)
@@ -344,9 +389,9 @@ public class Server {
 	 * @param serverName
 	 * @return
 	 */
-	private boolean IsServerActive(String serverName) {
+	private static boolean IsServerActive(String serverName) {
 		String portNo = Config.getValue(serverName);
-		Message hellowMsg = new Message(Message.HELLO, Message.STATUS_FAIL, null, 0, 0, 0, null);
+		Message hellowMsg = new Message(Message.HELLO, Message.STATUS_FAIL, null, null, null, 0, 0, 0, null);
 		
 		Message reply = Sender.messageToFileServer(serverName, portNo, hellowMsg);
 		

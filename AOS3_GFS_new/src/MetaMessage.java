@@ -21,19 +21,24 @@ public class MetaMessage implements Serializable {
 	String fileName;
 	int offSet;
 	int len;
-	String serverName;
+	String masterServer;
+	String server1;
+	String server2;
+
 	String data;
 	int chunkNo;
 
 	public MetaMessage(int type, int status, String fileName, int offSet,
-			int len, String serverName, String chunkName, String data) {
+			int len, String masterServer,String server1,String server2, String chunkName, String data) {
 		super();
 		this.type = type;
 		this.status = status;
 		this.fileName = fileName;
 		this.offSet = offSet;
 		this.len = len;
-		this.serverName = serverName;
+		this.masterServer = masterServer;
+		this.server1 = server1;
+		this.server2 = server2;
 		this.chunkNo = -1;
 		this.data = data;
 	}
@@ -62,7 +67,7 @@ public class MetaMessage implements Serializable {
 		switch (type) {
 		case READ:
 			msgtext.append("Read");
-			msgtext.append("|" + offSet + "|" + len + "|" + serverName + "|"
+			msgtext.append("|" + offSet + "|" + len + "|" + masterServer+ "|"+server1+ "|"+server1+ "|"
 					+ fileName + "|" + chunkNo + "|-->" + data);
 			break;
 		case BEATS:
@@ -70,12 +75,12 @@ public class MetaMessage implements Serializable {
 			break;
 		case WRITE:
 			msgtext.append("Write");
-			msgtext.append("|" + serverName + "|" + fileName + "|" + chunkNo
+			msgtext.append("|" + masterServer+ "|"+server1+ "|"+server1 + "|" + fileName + "|" + chunkNo
 					+ "|-->" + data);
 			break;
 		case APPEND:
 			msgtext.append("Append");
-			msgtext.append("|" + serverName + "|" + fileName + "|" + chunkNo
+			msgtext.append("|" + masterServer+ "|"+server1+ "|"+server1 + "|" + fileName + "|" + chunkNo
 					+ "|-->" + data);
 			break;
 		default:

@@ -20,18 +20,22 @@ public class Message implements Serializable {
 	int type;
 	int status;
 	String fileName;
+	String server1;
+	String server2;
 	int chunkNo;
 	int offSet;
 	int len;
 
 	String data;
 
-	public Message(int type, int status, String fileName, int chunkNo,
+	public Message(int type, int status, String fileName, String server1, String server2,int chunkNo,
 			int offSet, int len, String data) {
 		super();
 		this.type = type;
 		this.status = status;
 		this.fileName = fileName;
+//		this.server1 = server1;
+//		this.server2 = server1;
 		this.chunkNo = chunkNo;
 		this.offSet = offSet;
 		this.len = len;
@@ -66,15 +70,15 @@ public class Message implements Serializable {
 			break;
 		case WRITE:
 			msgtext.append("Write");
-			msgtext.append("|" + fileName + "|-->" + data);
+			msgtext.append("|"+server1+ "|"+server1+ "|" + fileName + "|-->" + data);
 			break;
 		case CREATE:
 			msgtext.append("Create");
-			msgtext.append("|" + fileName + "|-->" + data);
+			msgtext.append("|"+server1+ "|"+server1+ "|"+ fileName + "|-->" + data);
 			break;
 		case APPEND:
 			msgtext.append("Append");
-			msgtext.append("|" + fileName + "|-->" + data);
+			msgtext.append("|"+server1+ "|"+server1+ "|"+ fileName + "|-->" + data);
 			break;
 		case HELLO:
 			msgtext.append("Hello");
