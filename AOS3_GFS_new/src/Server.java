@@ -114,7 +114,7 @@ public class Server {
 			break;
 
 		case Message.CREATE:
-			if (Create(msg.server1,msg.server1,msg)) {
+			if (Create(msg.server1,msg.server2,msg)) {
 				reply.status = Message.STATUS_SUCCESS;
 				reply.data = "Successfully created";
 			} else {
@@ -238,6 +238,7 @@ public class Server {
 
 		case Message.HELLO:
 			reply.data = "Alive";
+			reply.status = Message.STATUS_SUCCESS;
 			break;
 
 		}
@@ -256,22 +257,17 @@ public class Server {
 		String fname = serverName + "/" + msg.fileName + msg.chunkNo;	
 		boolean isS1Active = IsServerActive(s1);
 		boolean isS2Active = IsServerActive(s2);
-		if(!isS1Active || !isS2Active)
+		if(isS1Active && isS2Active )
 		{
-			return false;
-		}
-		else
-		{
-			if (FileOperations.writeFile(fname, 0, msg.data)) 
+			if (FileOperations.createFile(fname)) 
 			{
-				Fs.addFile(msg.fileName, msg.chunkNo, msg.data.length(),true);
+				Fs.addFile(msg.fileName, msg.chunkNo, 0,true);
 				return(Create(s1, msg) && Create(s2, msg));
 			}
-			else
-			{
-				return false;
-			}
-		}		
+		}
+
+		return false;
+
 	}
 	
 	/**
@@ -283,6 +279,7 @@ public class Server {
 	private static boolean Create(String serverName, Message msg) {
 		String portNo = Integer.valueOf(Config.getValue(serverName))-100+"";
 		Message reply = Sender.messageToFileServer(serverName, portNo, msg);
+		if(reply!=null) System.out.println("create to "+reply.toString());
 		if(reply.status == Message.STATUS_SUCCESS)
 			return true;
 		else
@@ -300,11 +297,7 @@ public class Server {
 	{
 		boolean isS1Active = IsServerActive(s1);
 		boolean isS2Active = IsServerActive(s2);
-		if(!isS1Active || !isS2Active)
-		{
-			return false;
-		}
-		else
+		if(isS1Active && isS2Active)
 		{
 			String fname = serverName + "/" + msg.fileName + msg.chunkNo;
 			int fileSize = FileOperations.countCharsBuffer(fname, "US-ASCII");
@@ -323,10 +316,10 @@ public class Server {
 			if (FileOperations.writeFile(fname, fileSize, data)) {
 				Fs.addFile(msg.fileName, msg.chunkNo, fileSize + data.length(),true);
 				return( Append(s1,msg) && Append(s2, msg));
-			} else {
-				return false;
 			}
 		}
+		
+		return false;
 	}
 	
 	/**
@@ -338,6 +331,8 @@ public class Server {
 	private static boolean Append(String serverName, Message msg) {
 		String portNo = Integer.valueOf(Config.getValue(serverName))-100+"";
 		Message reply = Sender.messageToFileServer(serverName, portNo, msg);
+		if(reply!=null) System.out.println(reply.toString());
+
 		if(reply.status == Message.STATUS_SUCCESS)
 			return true;
 		else
@@ -356,21 +351,14 @@ public class Server {
 		String fname = serverName + "/" + msg.fileName + msg.chunkNo;	
 		boolean isS1Active = IsServerActive(s1);
 		boolean isS2Active = IsServerActive(s2);
-		if(!isS1Active || !isS2Active)
-		{
-			return false;
-		}
-		else
+		if(isS1Active && isS2Active)
 		{
 			if (FileOperations.writeFile(fname, 0, msg.data)) {
 				Fs.addFile(msg.fileName, msg.chunkNo, msg.data.length(),true);
 				return(Write(s1, msg) && Write(s2, msg));
 			}
-			else
-			{
-				return false;
-			}
 		}
+		return false;
 	}
 
 	
@@ -383,6 +371,8 @@ public class Server {
 	private static boolean Write(String serverName, Message msg) {
 		String portNo = Integer.valueOf(Config.getValue(serverName))-100+"";
 		Message reply = Sender.messageToFileServer(serverName, portNo, msg);
+		if(reply!=null) System.out.println(reply.toString());
+
 		if(reply.status == Message.STATUS_SUCCESS)
 			return true;
 		else
@@ -401,11 +391,16 @@ public class Server {
 		
 		Message reply = Sender.messageToFileServer(serverName, portNo, hellowMsg);
 		
-		if(reply.data.equals("Alive"))
+		if(reply!=null) System.out.println(reply.toString());
+		
+		if(reply.status == Message.STATUS_SUCCESS)
 		{
+//			System.out.println(serverName+" is active");
 			return true;
 		}
-		else
+		else{
+//			System.out.println(serverName+" is inactive");
 			return false;
+			}
 	}
 }
