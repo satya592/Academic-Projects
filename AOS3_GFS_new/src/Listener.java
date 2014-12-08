@@ -50,7 +50,7 @@ public class Listener {
 				String clientName = socket.getInetAddress().getHostAddress();
 				log("Received msg from:" + clientName);
 				Thread msgRequestHandler = new Thread(new RequestHandler(
-						socket, ListenerWrapper.REQ));
+						socket, ListenerWrapper.SER_REQ));
 				msgRequestHandler.start();
 			}
 			while (type == ListenerWrapper.META_REQ) {

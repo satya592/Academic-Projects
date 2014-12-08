@@ -133,8 +133,9 @@ public class Server {
 			log("Read:" + reply.data);
 			break;
 			
-		case Message.HELLO:
-			reply.data = "Alive";
+		default:
+			
+			reply.data = "Unknow message received";
 			break;
 		}
 		System.out.println(reply.toString());
@@ -173,7 +174,7 @@ public class Server {
 		RequestListener.start();
 
 //		edited by Bharath for Server to server communication.
-		Thread ServerRequestListener = new Thread(new ListenerWrapper(reqPort, ListenerWrapper.SER_REQ));
+		Thread ServerRequestListener = new Thread(new ListenerWrapper(reqPort-100, ListenerWrapper.SER_REQ));
 		ServerRequestListener.start();
 
 		
@@ -234,7 +235,11 @@ public class Server {
 				reply.data = "Failed to create file on disk";
 			}
 			break;
-		
+
+		case Message.HELLO:
+			reply.data = "Alive";
+			break;
+
 		}
 		return reply;
 	}
@@ -276,7 +281,7 @@ public class Server {
 	 * @return
 	 */
 	private static boolean Create(String serverName, Message msg) {
-		String portNo = Config.getValue(serverName);
+		String portNo = Integer.valueOf(Config.getValue(serverName))-100+"";
 		Message reply = Sender.messageToFileServer(serverName, portNo, msg);
 		if(reply.status == Message.STATUS_SUCCESS)
 			return true;
@@ -331,7 +336,7 @@ public class Server {
 	 * @return
 	 */
 	private static boolean Append(String serverName, Message msg) {
-		String portNo = Config.getValue(serverName);
+		String portNo = Integer.valueOf(Config.getValue(serverName))-100+"";
 		Message reply = Sender.messageToFileServer(serverName, portNo, msg);
 		if(reply.status == Message.STATUS_SUCCESS)
 			return true;
@@ -376,7 +381,7 @@ public class Server {
 	 * @return
 	 */
 	private static boolean Write(String serverName, Message msg) {
-		String portNo = Config.getValue(serverName);
+		String portNo = Integer.valueOf(Config.getValue(serverName))-100+"";
 		Message reply = Sender.messageToFileServer(serverName, portNo, msg);
 		if(reply.status == Message.STATUS_SUCCESS)
 			return true;
@@ -390,8 +395,9 @@ public class Server {
 	 * @return
 	 */
 	private static boolean IsServerActive(String serverName) {
-		String portNo = Config.getValue(serverName);
-		Message hellowMsg = new Message(Message.HELLO, Message.STATUS_FAIL, null, null, null, 0, 0, 0, null);
+		System.out.println(serverName);
+		String portNo = Integer.valueOf(Config.getValue(serverName))-100+"";
+		Message hellowMsg = new Message(Message.HELLO, Message.STATUS_REQ, null, null, null, 0, 0, 0, null);
 		
 		Message reply = Sender.messageToFileServer(serverName, portNo, hellowMsg);
 		

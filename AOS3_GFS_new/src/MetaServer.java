@@ -46,11 +46,13 @@ public class MetaServer {
 		}
 
 		switch (msg.type) {
+		
 		case MetaMessage.APPEND:
 			// find max chunck size
 			int maxchunk = -1;
 			maxchunk = findMaxchunk(fname);
 		String servers3[] =findServer2Append(fname);
+		System.out.println("Selected servers:"+servers3[0]+":"+servers3[1]+":"+servers3[2]);
 		
 			if (maxchunk <= -1 || servers3 == null) {
 				reply.data = "Error:File does not exist";
@@ -108,13 +110,16 @@ public class MetaServer {
 					reply.masterServer = available[0];
 					reply.server1 = available[1];
 					reply.server2 = available[2];
+				}else{
+					break;
 				}
+				System.out.println("Selected servers:"+reply.masterServer+":"+reply.server1+":"+reply.server2);
 				
 				// Create file
 				Message rpy2Msg = Sender.messageToFileServer(reply.masterServer,
 						Config.getValue(reply.masterServer), new Message(
 								Message.CREATE, Message.STATUS_REQ, fname,
-								reply.server1, reply.server2, (maxchunk + 1), 0, 0, null));
+								available[1], available[2], (maxchunk + 1), 0, 0, null));
 
 				if (rpy2Msg != null && rpy2Msg.status == Message.STATUS_SUCCESS) {
 					log(rpy2Msg.toString());
@@ -151,14 +156,15 @@ public class MetaServer {
 
 			String[] available = MetaServer.loadBalance();
 			if(available.length >=3 ){
-				reply.masterServer = MetaServer.loadBalance()[0];
-				reply.server1 = MetaServer.loadBalance()[1];
-				reply.server2 = MetaServer.loadBalance()[2];
+				reply.masterServer = available[0];
+				reply.server1 = available[1];
+				reply.server2 = available[2];
 			}else{
 				reply.data = "Error:Server not available";
 				break;
 			}
 			
+			System.out.println("selected servers:"+reply.masterServer+":"+reply.server1+":"+reply.server2);
 
 			// create file
 			Message rpyMsg = Sender.messageToFileServer(reply.masterServer,
@@ -324,7 +330,6 @@ public class MetaServer {
 	    	ServerInfo sInfo = sortedServs.poll();
 //	    	System.out.println(sInfo.name);
 	    	if(sInfo.status){
-//	    		top.add(0,sInfo.name);
 	    		top.add(sInfo.name);
 	    	}
 	    }

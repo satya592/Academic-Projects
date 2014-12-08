@@ -67,7 +67,7 @@ public class MetaMessage implements Serializable {
 		switch (type) {
 		case READ:
 			msgtext.append("Read");
-			msgtext.append("|" + offSet + "|" + len + "|" + masterServer+ "|"+server1+ "|"+server1+ "|"
+			msgtext.append("|" + offSet + "|" + len + "|" + masterServer+ "|"+server1+ "|"+server2+ "|"
 					+ fileName + "|" + chunkNo + "|-->" + data);
 			break;
 		case BEATS:
@@ -75,12 +75,12 @@ public class MetaMessage implements Serializable {
 			break;
 		case WRITE:
 			msgtext.append("Write");
-			msgtext.append("|" + masterServer+ "|"+server1+ "|"+server1 + "|" + fileName + "|" + chunkNo
+			msgtext.append("|" + masterServer+ "|"+server1+ "|"+server2 + "|" + fileName + "|" + chunkNo
 					+ "|-->" + data);
 			break;
 		case APPEND:
 			msgtext.append("Append");
-			msgtext.append("|" + masterServer+ "|"+server1+ "|"+server1 + "|" + fileName + "|" + chunkNo
+			msgtext.append("|" + masterServer+ "|"+server1+ "|"+server2 + "|" + fileName + "|" + chunkNo
 					+ "|-->" + data);
 			break;
 		default:

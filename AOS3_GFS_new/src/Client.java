@@ -108,7 +108,7 @@ public class Client {
 
 						Message req_msg = new Message(statusMsg.type,
 								Message.STATUS_REQ, statusMsg.fileName,
-								null, null, statusMsg.chunkNo, statusMsg.offSet,
+								statusMsg.server1, statusMsg.server2, statusMsg.chunkNo, statusMsg.offSet,
 								statusMsg.len, data);
 
 						Message reply_msg = Sender.messageToFileServer(

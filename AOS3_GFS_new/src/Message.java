@@ -34,8 +34,8 @@ public class Message implements Serializable {
 		this.type = type;
 		this.status = status;
 		this.fileName = fileName;
-//		this.server1 = server1;
-//		this.server2 = server1;
+		this.server1 = server1;
+		this.server2 = server2;
 		this.chunkNo = chunkNo;
 		this.offSet = offSet;
 		this.len = len;
@@ -70,15 +70,15 @@ public class Message implements Serializable {
 			break;
 		case WRITE:
 			msgtext.append("Write");
-			msgtext.append("|"+server1+ "|"+server1+ "|" + fileName + "|-->" + data);
+			msgtext.append("|"+server1+ "|"+server2+ "|" + fileName + "|-->" + data);
 			break;
 		case CREATE:
 			msgtext.append("Create");
-			msgtext.append("|"+server1+ "|"+server1+ "|"+ fileName + "|-->" + data);
+			msgtext.append("|"+server1+ "|"+server2+ "|"+ fileName + "|-->" + data);
 			break;
 		case APPEND:
 			msgtext.append("Append");
-			msgtext.append("|"+server1+ "|"+server1+ "|"+ fileName + "|-->" + data);
+			msgtext.append("|"+server1+ "|"+server2+ "|"+ fileName + "|-->" + data);
 			break;
 		case HELLO:
 			msgtext.append("Hello");
