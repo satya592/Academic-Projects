@@ -18,20 +18,22 @@ import java.util.Set;
 			this.name = name;
 			this.status = status;
 			this.fs = fs;
-			this.size=fs.size;
+			if(fs!=null)this.size=fs.size;
+			else size=0;
 		}
 
 		ServerInfo(String name, boolean status, FileSystem fs, int size) {
 			this.name = name;
 			this.status = status;
 			this.fs = fs;
-			this.size=size;
+			if(fs!=null)this.size=fs.size;
+			else size=0;
 		}
 
 		synchronized void setStatus(boolean status) {
 			this.status = status;
-			if (!status)
-				this.fs = null;
+//			if (!status)
+//				this.fs = null;
 		}
 
 		synchronized int getSize() {
@@ -40,7 +42,10 @@ import java.util.Set;
 		
 		@Override
 		public String toString(){
+			if(fs!=null)
 			return name+"("+size+"){"+fs.toString()+"}";
+			else 
+				return name+"("+size+"){null}";
 		}
 
 		synchronized boolean updateMetaData(String name, FileSystem fs) {

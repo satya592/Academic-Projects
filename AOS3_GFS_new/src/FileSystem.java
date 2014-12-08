@@ -31,20 +31,23 @@ public class FileSystem implements Serializable {
  * @param size
  * @return
  */
-	synchronized boolean addFile(String file, Integer chunkName, Integer size,boolean master) {
-		log(file + ":" + chunkName + ":" + size);
+	synchronized boolean addFile(String file, Integer chunkName, Integer newsize,boolean master) {
+		log(file + ":" + chunkName + ":" + newsize);
 		// if (fileInfo.get(file) == null
 		// || fileInfo.get(file).fileChunks.get(chunkName) == null) {
 		if (fileInfo.get(file) == null){
 			fileInfo.put(file, new File(file,master));
 			}
-		fileInfo.get(file).addChunk(chunkName, size,master);
-		this.size+=size;
+		else{
+			if(fileInfo.get(file).fileChunks!=null&&fileInfo.get(file).fileChunks.get(chunkName)!=null)
+				this.size-=fileInfo.get(file).fileChunks.get(chunkName);
+			System.out.println("size updated to:"+size);
+		}
+		
+		fileInfo.get(file).addChunk(chunkName, newsize,master);
+		this.size+=newsize;
 
 		return true;
-		// } else {
-		// return false;
-		// }
 	}
 
 	synchronized File getFile(String file) {
@@ -55,7 +58,7 @@ public class FileSystem implements Serializable {
 	}
 
 	synchronized boolean isMaster(String file) {
-		if (fileInfo!=null)
+		if (fileInfo!=null && fileInfo.get(file)!=null)
 			return fileInfo.get(file).isMaster;
 		
 		return false;
@@ -65,8 +68,14 @@ public class FileSystem implements Serializable {
 		log(file + ":" + chunkName + ":" + newsize);
 		if (fileInfo.get(file) == null)
 			return false;
+		else{
+			if(fileInfo.get(file).fileChunks!=null&&fileInfo.get(file).fileChunks.get(chunkName)!=null)
+				this.size-=fileInfo.get(file).fileChunks.get(chunkName);
+			System.out.println("size updated to:"+size);
+		}
+
 		fileInfo.get(file).addChunk(chunkName, newsize,isMaster);
-		this.size+=size;
+		this.size+=newsize;
 		return true;
 	}
 
@@ -75,6 +84,15 @@ public class FileSystem implements Serializable {
 		this.size+=file.size;
 		return true;
 	}
+
+	int filesInFS(){
+		int size=0;
+		for (Entry<String, File> e : this.fileInfo.entrySet()) {
+			size+=(e.getValue()).fileChunks.size();
+		}
+		return size;
+	}
+	
 
 	int getChunkSize(String file, Integer chunkName) {
 		if (fileInfo.get(file) != null
@@ -85,6 +103,7 @@ public class FileSystem implements Serializable {
 		}
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder();
 		for (Entry<String, File> e : fileInfo.entrySet()) {

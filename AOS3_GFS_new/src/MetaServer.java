@@ -230,6 +230,65 @@ public class MetaServer {
 		log(reply.toString());
 		return reply;
 	}
+	/**
+	 * 
+	 * @param serverName
+	 */
+	synchronized static void replicateFailedNode(String serverName){
+		System.out.println("Replication started...."+serverName);
+		PriorityQueue<ServerInfo> sortedServs = new PriorityQueue<ServerInfo>(20,
+				new ServerComparator());
+		PriorityQueue<ServerInfo> remainingServs = new PriorityQueue<ServerInfo>(20,
+				new ServerComparator());
+		FileSystem failedFs = null;
+		
+		
+	    Iterator it = servers.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry pairs = (Map.Entry)it.next();
+//	        System.out.println(pairs.getKey() + " = " + ((ServerInfo)pairs.getValue()).toString());
+	        if(!((String)pairs.getKey()).equals(serverName)) 
+	        	sortedServs.add((ServerInfo) pairs.getValue());
+	        else
+	        	failedFs = ((ServerInfo) pairs.getValue()).fs;
+	    }
+	    
+	    if(sortedServs.size()<3) return ;
+	    
+	    System.out.println(servers.get(serverName));
+	    
+	    if(servers.get(serverName).fs==null || servers.get(serverName).fs.fileInfo == null){
+	    	System.out.println("Nothing to replicate");
+	    }
+	    
+		for (Entry<String, File> e : servers.get(serverName).fs.fileInfo.entrySet()) {
+			String fileName = e.getKey() ;
+			Integer fileChunks[] = e.getValue().fileChunks.keySet().toArray(new Integer[e.getValue().fileChunks.size()]);
+			
+			for(Integer chunkNo:fileChunks){
+				System.out.println("coping:"+fileName+chunkNo);
+				
+				while(!sortedServs.isEmpty()){
+					ServerInfo dest = sortedServs.poll();
+					if(dest.findSize(fileName, chunkNo)>-1){
+						remainingServs.add(dest);
+					}else{
+						String destination = dest.name;
+						FileOperations.copyFile(serverName, destination, fileName+chunkNo);
+						System.out.println("copied to:"+destination);
+						servers.get(destination).fs.addFile(fileName, chunkNo, e.getValue().fileChunks.get(chunkNo), servers.get(destination).fs.isMaster(fileName));
+						sortedServs.add(dest);
+						while(!remainingServs.isEmpty()){
+							sortedServs.add(remainingServs.poll());							
+						}
+						break;
+					}
+				
+				}
+			}
+		}
+
+	}
 	
 	/**
 	 * 
@@ -239,6 +298,8 @@ public class MetaServer {
 	private static int findMaxchunk(String fname) {
 		int maxchunk=-1;
 		for (Entry<String, ServerInfo> e : servers.entrySet()) {
+			if(!e.getValue().status)
+				continue;
 			int chunk = e.getValue().findMaxChunk(fname);
 			if (chunk > maxchunk) {
 				maxchunk = chunk;
@@ -260,6 +321,9 @@ public class MetaServer {
 		
 		for (Entry<String, ServerInfo> e : servers.entrySet()) {
 
+			if(!e.getValue().status)
+				continue;
+			
 			if(e.getValue().fs !=null) log(e.getValue().fs.toString());
 			else continue;
 
@@ -311,6 +375,8 @@ public class MetaServer {
 	    while (it.hasNext()) {
 	        Map.Entry pairs = (Map.Entry)it.next();
 //	        System.out.println(pairs.getKey() + " = " + ((ServerInfo)pairs.getValue()).toString());
+			if(!((ServerInfo)pairs.getValue()).status)
+				continue;
 	        sortedServs.add((ServerInfo) pairs.getValue());
 	    }
 	    
@@ -331,6 +397,7 @@ public class MetaServer {
 
 	static boolean updateMetaData(String serverName, FileSystem fs) {
 
+		fs = new FileSystem(fs);
 		if (serverName == null)
 			return false;
 		if (servers.get(serverName) == null) {

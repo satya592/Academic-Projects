@@ -90,7 +90,7 @@ public class Server {
 	public static void main(String[] args) throws Exception {
 		int reqPort = Integer.valueOf(Config.getValue(serverName));
 
-		//FileOperations.deleteDirectory(serverName);
+		FileOperations.deleteDirectory(serverName);
 
 		FileOperations.createDirectory(serverName);
 

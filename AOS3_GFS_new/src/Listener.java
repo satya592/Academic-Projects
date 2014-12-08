@@ -29,11 +29,15 @@ public class Listener {
 				log("Listening to " + clientName);
 				if (clients.get(clientName) != null) {
 					log((socket.toString()));
+					MetaServer.setServer(clientName, false, null);
+					MetaServer.replicateFailedNode(clientName);
 					clients.get(clientName).interrupt();
 				}
 				HeartBeatListener client = new HeartBeatListener(socket,
 						clientNumber++);
 				clients.put(clientName, client);
+//				MetaServer.setServer(clientName, true, null);
+
 				client.start();
 			}
 			log("Listing requests...");
@@ -142,6 +146,7 @@ public class Listener {
 		 * message then repeatedly reading strings and sending back the
 		 * capitalized version of the string.
 		 */
+		@Override
 		public void run() {
 			try {
 
@@ -184,6 +189,7 @@ public class Listener {
 				}
 
 				MetaServer.setServer(serverName, false, null);
+				MetaServer.replicateFailedNode(serverName);
 
 			} catch (IOException e) {
 				log("Error handling client# " + clientNumber + ": " + e);

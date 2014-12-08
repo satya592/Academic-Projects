@@ -1,8 +1,9 @@
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 
 public class FileOperations {
@@ -21,6 +22,35 @@ public class FileOperations {
 			return false;
 	}
 
+	static boolean copyFile(String source,String destination,String file){
+		File src = new File("./" + source+"/"+file);
+		File desti = new File("./"+destination+"/"+file);
+		// check if file exist, otherwise create the file before writing
+		if (src.exists()) {
+	        if (!desti.exists()) {
+	            InputStream in;
+				try {
+					in = new FileInputStream(src);
+	            OutputStream out = new FileOutputStream(desti);
+
+	            // Copy the bits from instream to outstream
+	            byte[] buf = new byte[8192];
+	            int len;
+	            while ((len = in.read(buf)) > 0) {
+	                out.write(buf, 0, len);
+	            }
+	            in.close();
+	            out.close();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	        return true;
+	        }
+		}
+return false;
+	}
+	
 	static String[] listOfFiles(String dir) {
 		File file = new File("./" + dir);
 		File[] files = file.listFiles();
@@ -103,24 +133,25 @@ public class FileOperations {
 	}
 
 	static int countCharsBuffer(String f, String charsetName) {
-		BufferedReader reader;
-		int charCount = 0;
+		return (int)new File(f).length();
 
-		try {
-			reader = new BufferedReader(new InputStreamReader(
-					new FileInputStream(new File(f)), charsetName));
-			char[] cbuf = new char[9000];
-			int read = 0;
-			while ((read = reader.read(cbuf)) > -1) {
-				charCount += read;
-			}
-			reader.close();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return charCount;
+//		BufferedReader reader;
+//		int charCount = 0;
+//		try {
+//			reader = new BufferedReader(new InputStreamReader(
+//					new FileInputStream(new File(f)), charsetName));
+//			char[] cbuf = new char[9000];
+//			int read = 0;
+//			while ((read = reader.read(cbuf)) > -1) {
+//				charCount += read;
+//			}
+//			reader.close();
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//		return charCount;
 	}
 
 	public static boolean deleteDirectory(String dir) {
