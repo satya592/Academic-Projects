@@ -267,22 +267,26 @@ public class MetaServer {
 			
 			for(Integer chunkNo:fileChunks){
 				System.out.println("coping:"+fileName+chunkNo);
-				
+				String destination = null;
 				while(!sortedServs.isEmpty()){
 					ServerInfo dest = sortedServs.poll();
 					if(dest.findSize(fileName, chunkNo)>-1){
 						remainingServs.add(dest);
-					}else{
-						String destination = dest.name;
-						FileOperations.copyFile(serverName, destination, fileName+chunkNo);
-						System.out.println("copied to:"+destination);
-						servers.get(destination).fs.addFile(fileName, chunkNo, e.getValue().fileChunks.get(chunkNo), servers.get(destination).fs.isMaster(fileName));
-						sortedServs.add(dest);
-						while(!remainingServs.isEmpty()){
-							sortedServs.add(remainingServs.poll());							
-						}
-						break;
+					}else if(destination ==null){
+						destination = dest.name;
 					}
+					if(remainingServs.size()>0 && destination!=null){
+					System.out.println("coping:"+fileName+chunkNo+remainingServs.peek().name+"-->"+destination);
+					FileOperations.copyFile(remainingServs.peek().name, destination, fileName+chunkNo);
+					System.out.println("copied to:"+destination);
+					servers.get(destination).fs.addFile(fileName, chunkNo, e.getValue().fileChunks.get(chunkNo), servers.get(destination).fs.isMaster(fileName));
+					sortedServs.add(dest);
+					while(!remainingServs.isEmpty()){
+						sortedServs.add(remainingServs.poll());							
+					}
+					break;
+
+				}
 				
 				}
 			}

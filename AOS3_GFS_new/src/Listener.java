@@ -29,8 +29,8 @@ public class Listener {
 				log("Listening to " + clientName);
 				if (clients.get(clientName) != null) {
 					log((socket.toString()));
-					MetaServer.setServer(clientName, false, null);
-					MetaServer.replicateFailedNode(clientName);
+//					MetaServer.setServer(clientName, false, null);
+//					MetaServer.replicateFailedNode(clientName);
 					clients.get(clientName).interrupt();
 				}
 				HeartBeatListener client = new HeartBeatListener(socket,
